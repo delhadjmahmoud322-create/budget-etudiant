@@ -1,0 +1,5 @@
+DB_HOST     = "localhost"
+DB_USER     = "root"
+DB_PASSWORD = ""
+DB_NAME     = "budget_etudiant"
+SECRET_KEY  = "budget_etudiant_secret_2025"
