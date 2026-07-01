@@ -20,11 +20,11 @@ export default function Depenses({ token }) {
 
   const handleAjouter = async () => {
     if (!form.montant || !form.date_depense || !form.id_categorie) {
-      setMsg('Montant, date et catégorie sont obligatoires'); return;
+      setMsg('Montant, date et categorie sont obligatoires'); return;
     }
     try {
       await addDepense(token, form);
-      setMsg('Dépense ajoutée !');
+      setMsg('Depense ajoutee !');
       setForm({ montant: '', date_depense: '', description: '', id_categorie: '' });
       charger();
     } catch (e) { setMsg(e.response?.data?.erreur || 'Erreur'); }
@@ -45,7 +45,7 @@ export default function Depenses({ token }) {
     try {
       await updateDepense(token, id, formModif);
       setEnModif(null);
-      setMsg('Dépense modifiée !');
+      setMsg('Depense modifiee !');
       charger();
     } catch (e) { setMsg(e.response?.data?.erreur || 'Erreur modification'); }
   };
@@ -54,9 +54,10 @@ export default function Depenses({ token }) {
 
   return (
     <div style={styles.page}>
-      <h2 style={styles.title}>Mes dépenses</h2>
+      <h2 style={styles.title}>Mes depenses</h2>
+
       <div style={styles.card}>
-        <h3 style={{marginTop:0}}>Ajouter une dépense</h3>
+        <h3 style={{marginTop:0}}>Ajouter une depense</h3>
         {msg && <div style={styles.msg}>{msg}</div>}
         <div style={styles.formRow}>
           <input style={styles.input} type='number' placeholder='Montant (FCFA)'
@@ -65,23 +66,28 @@ export default function Depenses({ token }) {
             value={form.date_depense} onChange={e => setForm({...form, date_depense: e.target.value})} />
           <select style={styles.input} value={form.id_categorie}
             onChange={e => setForm({...form, id_categorie: e.target.value})}>
-            <option value=''>-- Catégorie --</option>
-            {categories.map(c => <option key={c.id_categorie} value={c.id_categorie}>{c.nom_categorie}</option>)}
+            <option value=''>-- Categorie --</option>
+            {categories.map(c => (
+              <option key={c.id_categorie} value={c.id_categorie}>{c.nom_categorie}</option>
+            ))}
           </select>
           <input style={styles.input} type='text' placeholder='Description (optionnel)'
             value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
         </div>
         <button style={styles.btn} onClick={handleAjouter}>Ajouter</button>
       </div>
+
       <div style={styles.card}>
         <table style={styles.table}>
-          <thead><tr style={styles.theadRow}>
-            <th style={styles.th}>Date</th>
-            <th style={styles.th}>Catégorie</th>
-            <th style={styles.th}>Montant</th>
-            <th style={styles.th}>Description</th>
-            <th style={styles.th}>Action</th>
-          </tr></thead>
+          <thead>
+            <tr style={styles.theadRow}>
+              <th style={styles.th}>Date</th>
+              <th style={styles.th}>Categorie</th>
+              <th style={styles.th}>Montant</th>
+              <th style={styles.th}>Description</th>
+              <th style={styles.th}>Action</th>
+            </tr>
+          </thead>
           <tbody>
             {depenses.map(d => (
               <tr key={d.id_depense} style={styles.tr}>
@@ -112,3 +118,27 @@ export default function Depenses({ token }) {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  page: { padding: 30, fontFamily: 'Arial, sans-serif', background: '#F4F6F9', minHeight: '100vh' },
+  title: { color: '#1B3A5C' },
+  card: { background: '#fff', borderRadius: 10, padding: 24, marginBottom: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' },
+  formRow: { display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 12 },
+  input: { padding: '9px 12px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14, flex: 1, minWidth: 140 },
+  inputSmall: { padding: '5px 8px', borderRadius: 5, border: '1px solid #ddd', width: 90, fontSize: 12 },
+  btn: { padding: '9px 24px', background: '#1B3A5C', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' },
+  btnEdit: { padding: '5px 10px', background: '#E07A1E', color: '#fff', border: 'none', borderRadius: 5, cursor: 'pointer', fontSize: 12 },
+  btnDel: { padding: '5px 10px', background: '#C0392B', color: '#fff', border: 'none', borderRadius: 5, cursor: 'pointer', fontSize: 12 },
+  btnSave: { padding: '5px 10px', background: '#27AE60', color: '#fff', border: 'none', borderRadius: 5, cursor: 'pointer', fontSize: 12 },
+  btnCancel: { padding: '5px 10px', background: '#95A5A6', color: '#fff', border: 'none', borderRadius: 5, cursor: 'pointer', fontSize: 12 },
+  msg: { padding: '8px 14px', background: '#FFF3E0', borderRadius: 6, marginBottom: 12, fontSize: 14 },
+  table: { width: '100%', borderCollapse: 'collapse' },
+  theadRow: { background: '#1B3A5C' },
+  th: { padding: '10px 12px', color: '#fff', textAlign: 'left', fontSize: 13 },
+  tr: { borderBottom: '1px solid #f0f0f0' },
+  td: { padding: '10px 12px', fontSize: 13 },
+};

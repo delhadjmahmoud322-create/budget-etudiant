@@ -5,16 +5,15 @@ import {
   CategoryScale, LinearScale, PointElement, LineElement, Title
 } from 'chart.js';
 import { getDashboard, getAlertes } from '../services/api';
-import Navbar from '../components/Navbar'; 
 
 ChartJS.register(ArcElement, Tooltip, Legend,
   CategoryScale, LinearScale, PointElement, LineElement, Title);
- 
-export default function Dashboard({ token, user, onLogout }) {
+
+export default function Dashboard({ token, user }) {
   const [data, setData] = useState(null);
   const [alertes, setAlertes] = useState([]);
   const [loading, setLoading] = useState(true);
- 
+
   useEffect(() => {
     if (!token) return;
     Promise.all([getDashboard(token), getAlertes(token)])
@@ -25,64 +24,53 @@ export default function Dashboard({ token, user, onLogout }) {
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, [token]);
- 
+
   if (loading) return <div style={styles.loading}>Chargement...</div>;
   if (!data) return <div style={styles.loading}>Aucun budget defini. Allez dans Budget pour commencer.</div>;
- 
+
   const pct = Math.min(100, Math.round((data.total_depense / data.budget_global) * 100));
   const alertesNonLues = alertes.filter(a => !a.lue);
- 
+
   const donutData = {
     labels: data.repartition_categories.map(r => r.nom_categorie),
     datasets: [{ data: data.repartition_categories.map(r => r.total),
       backgroundColor: data.repartition_categories.map(r => r.couleur || '#1B3A5C') }]
   };
- 
+
   const lineData = {
     labels: data.evolution.map(e => e.date_depense),
     datasets: [{ label: 'Depenses (FCFA)', data: data.evolution.map(e => e.total_jour),
       borderColor: '#E07A1E', backgroundColor: 'rgba(224,122,30,0.15)', tension: 0.4 }]
   };
- 
+
   return (
     <div style={styles.page}>
-      {/* NAVBAR */}
-      <div style={styles.navbar}>
-        <span style={styles.brand}>BudgetEtudiant</span>
-        <div style={styles.navLinks}>
-          <span style={styles.navLink}>Dashboard</span>
-          <a href='/budget' style={styles.navLink}>Budget</a>
-          <a href='/depenses' style={styles.navLink}>Depenses</a>
-          <a href='/historique' style={styles.navLink}>Historique</a>
-          <a href='/rapports' style={styles.navLink}>Rapports</a>
-        </div>
-        <div style={styles.navRight}>
-          {alertesNonLues.length > 0 && (
-            <span style={styles.badge}>{alertesNonLues.length} alerte(s)</span>
-          )}
-          <span style={styles.welcome}>Bonjour {user?.prenom} !</span>
-          <button style={styles.btnLogout} onClick={onLogout}>Deconnexion</button>
-        </div>
-      </div>
- 
+
       {/* ALERTES */}
       {alertesNonLues.map(a => (
-        <div key={a.id_alerte} style={{...styles.alerte, background: a.type_alerte === 'rouge' ? '#FDECEA' : '#FFF3E0'}}>
+        <div key={a.id_alerte} style={{...styles.alerte,
+          background: a.type_alerte === 'rouge' ? '#FDECEA' : '#FFF3E0'}}>
           <span>{a.type_alerte === 'rouge' ? '🔴' : '🟠'} {a.message}</span>
         </div>
       ))}
- 
+
       {/* CARTES RESUME */}
       <div style={styles.cartes}>
-        <div style={styles.carte}><div style={styles.carteLabel}>Budget total</div>
-          <div style={styles.carteVal}>{data.budget_global.toLocaleString()} FCFA</div></div>
-        <div style={styles.carte}><div style={styles.carteLabel}>Depenses</div>
-          <div style={{...styles.carteVal, color: '#E07A1E'}}>{data.total_depense.toLocaleString()} FCFA</div></div>
-        <div style={styles.carte}><div style={styles.carteLabel}>Solde restant</div>
+        <div style={styles.carte}>
+          <div style={styles.carteLabel}>Budget total</div>
+          <div style={styles.carteVal}>{data.budget_global.toLocaleString()} FCFA</div>
+        </div>
+        <div style={styles.carte}>
+          <div style={styles.carteLabel}>Depenses</div>
+          <div style={{...styles.carteVal, color: '#E07A1E'}}>{data.total_depense.toLocaleString()} FCFA</div>
+        </div>
+        <div style={styles.carte}>
+          <div style={styles.carteLabel}>Solde restant</div>
           <div style={{...styles.carteVal, color: data.solde < 0 ? '#C0392B' : '#27AE60'}}>
-            {data.solde.toLocaleString()} FCFA</div></div>
+            {data.solde.toLocaleString()} FCFA</div>
+        </div>
       </div>
- 
+
       {/* BARRE DE PROGRESSION */}
       <div style={styles.barreSection}>
         <div style={styles.barreLabel}>Consommation globale : {pct}%</div>
@@ -91,7 +79,7 @@ export default function Dashboard({ token, user, onLogout }) {
             background: pct >= 100 ? '#C0392B' : pct >= 80 ? '#E07A1E' : '#27AE60'}} />
         </div>
       </div>
- 
+
       {/* GRAPHIQUES */}
       <div style={styles.graphs}>
         <div style={styles.graphCard}>
@@ -106,21 +94,12 @@ export default function Dashboard({ token, user, onLogout }) {
     </div>
   );
 }
- 
+
 const styles = {
-  page: { minHeight: '100vh', background: '#F4F6F9', fontFamily: 'Arial, sans-serif' },
+  page: { minHeight: '100vh', background: '#F4F6F9', fontFamily: 'Arial, sans-serif', padding: '20px 0' },
   loading: { padding: 40, textAlign: 'center' },
-  navbar: { background: '#1B3A5C', color: '#fff', display: 'flex', alignItems: 'center',
-    justifyContent: 'space-between', padding: '12px 30px' },
-  brand: { fontWeight: 'bold', fontSize: 20 },
-  navLinks: { display: 'flex', gap: 20 },
-  navLink: { color: '#fff', textDecoration: 'none', cursor: 'pointer' },
-  navRight: { display: 'flex', alignItems: 'center', gap: 16 },
-  badge: { background: '#E07A1E', color: '#fff', padding: '2px 10px', borderRadius: 12, fontSize: 13 },
-  welcome: { fontSize: 14 },
-  btnLogout: { background: '#E07A1E', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: 6, cursor: 'pointer' },
   alerte: { margin: '12px 30px', padding: '10px 16px', borderRadius: 8, fontSize: 14 },
-  cartes: { display: 'flex', gap: 20, padding: '24px 30px 0' },
+  cartes: { display: 'flex', gap: 20, padding: '0 30px 0' },
   carte: { flex: 1, background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' },
   carteLabel: { color: '#888', fontSize: 13, marginBottom: 8 },
   carteVal: { fontSize: 24, fontWeight: 'bold', color: '#1B3A5C' },
