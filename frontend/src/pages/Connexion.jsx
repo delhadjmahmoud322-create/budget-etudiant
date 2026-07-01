@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { seConnecter } from '../services/api';
 
-export default function Connexion({ onConnexion }) {
-  const [email, setEmail] = useState('');
+export default function Connexion({ onLogin, onInscription }) {  const [email, setEmail] = useState('');
   const [mdp, setMdp] = useState('');
   const [erreur, setErreur] = useState('');
 
@@ -14,7 +13,7 @@ export default function Connexion({ onConnexion }) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('nom', data.nom);
       localStorage.setItem('prenom', data.prenom);
-      onConnexion();
+      onLogin(data.token, { nom: data.nom, prenom: data.prenom });
     } else {
       setErreur(data.erreur || 'Erreur de connexion');
     }
@@ -33,6 +32,13 @@ export default function Connexion({ onConnexion }) {
             value={mdp} onChange={e => setMdp(e.target.value)} />
           <button style={styles.btn} type="submit">Se connecter</button>
         </form>
+        <p style={{ textAlign:'center', marginTop:14, fontSize:13, color:'#888' }}>
+          Pas encore de compte ?
+          <span style={{ color:'#1B3A5C', fontWeight:'bold', cursor:'pointer', marginLeft:4 }}
+            onClick={onInscription}>
+            Creer un compte
+          </span>
+        </p>
       </div>
     </div>
   );
