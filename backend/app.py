@@ -4,6 +4,7 @@ from db import get_connection
 from routes.auth import auth_bp
 from routes.depenses import depenses_bp
 from routes.budget import budget_bp
+from routes.rapports import rapports_bp
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -11,6 +12,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.register_blueprint(auth_bp,     url_prefix="/api/auth")
 app.register_blueprint(depenses_bp, url_prefix="/api/depenses")
 app.register_blueprint(budget_bp,   url_prefix="/api/budget")
+app.register_blueprint(rapports_bp, url_prefix="/api/rapports")
 
 @app.route("/api/test")
 def test():
