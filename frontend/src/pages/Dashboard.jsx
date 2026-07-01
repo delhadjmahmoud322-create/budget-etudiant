@@ -5,15 +5,16 @@ import {
   CategoryScale, LinearScale, PointElement, LineElement, Title
 } from 'chart.js';
 import { getDashboard, getAlertes } from '../services/api';
+import Navbar from '../components/Navbar'; 
 
 ChartJS.register(ArcElement, Tooltip, Legend,
   CategoryScale, LinearScale, PointElement, LineElement, Title);
-
+ 
 export default function Dashboard({ token, user, onLogout }) {
   const [data, setData] = useState(null);
   const [alertes, setAlertes] = useState([]);
   const [loading, setLoading] = useState(true);
-
+ 
   useEffect(() => {
     if (!token) return;
     Promise.all([getDashboard(token), getAlertes(token)])
@@ -24,27 +25,28 @@ export default function Dashboard({ token, user, onLogout }) {
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, [token]);
-
+ 
   if (loading) return <div style={styles.loading}>Chargement...</div>;
   if (!data) return <div style={styles.loading}>Aucun budget defini. Allez dans Budget pour commencer.</div>;
-
+ 
   const pct = Math.min(100, Math.round((data.total_depense / data.budget_global) * 100));
   const alertesNonLues = alertes.filter(a => !a.lue);
-
+ 
   const donutData = {
     labels: data.repartition_categories.map(r => r.nom_categorie),
     datasets: [{ data: data.repartition_categories.map(r => r.total),
       backgroundColor: data.repartition_categories.map(r => r.couleur || '#1B3A5C') }]
   };
-
+ 
   const lineData = {
     labels: data.evolution.map(e => e.date_depense),
     datasets: [{ label: 'Depenses (FCFA)', data: data.evolution.map(e => e.total_jour),
       borderColor: '#E07A1E', backgroundColor: 'rgba(224,122,30,0.15)', tension: 0.4 }]
   };
-
+ 
   return (
     <div style={styles.page}>
+      {/* NAVBAR */}
       <div style={styles.navbar}>
         <span style={styles.brand}>BudgetEtudiant</span>
         <div style={styles.navLinks}>
@@ -62,13 +64,15 @@ export default function Dashboard({ token, user, onLogout }) {
           <button style={styles.btnLogout} onClick={onLogout}>Deconnexion</button>
         </div>
       </div>
-
+ 
+      {/* ALERTES */}
       {alertesNonLues.map(a => (
         <div key={a.id_alerte} style={{...styles.alerte, background: a.type_alerte === 'rouge' ? '#FDECEA' : '#FFF3E0'}}>
           <span>{a.type_alerte === 'rouge' ? '🔴' : '🟠'} {a.message}</span>
         </div>
       ))}
-
+ 
+      {/* CARTES RESUME */}
       <div style={styles.cartes}>
         <div style={styles.carte}><div style={styles.carteLabel}>Budget total</div>
           <div style={styles.carteVal}>{data.budget_global.toLocaleString()} FCFA</div></div>
@@ -78,7 +82,8 @@ export default function Dashboard({ token, user, onLogout }) {
           <div style={{...styles.carteVal, color: data.solde < 0 ? '#C0392B' : '#27AE60'}}>
             {data.solde.toLocaleString()} FCFA</div></div>
       </div>
-
+ 
+      {/* BARRE DE PROGRESSION */}
       <div style={styles.barreSection}>
         <div style={styles.barreLabel}>Consommation globale : {pct}%</div>
         <div style={styles.barreOuter}>
@@ -86,7 +91,8 @@ export default function Dashboard({ token, user, onLogout }) {
             background: pct >= 100 ? '#C0392B' : pct >= 80 ? '#E07A1E' : '#27AE60'}} />
         </div>
       </div>
-
+ 
+      {/* GRAPHIQUES */}
       <div style={styles.graphs}>
         <div style={styles.graphCard}>
           <h3 style={styles.graphTitle}>Repartition par categorie</h3>
@@ -100,7 +106,7 @@ export default function Dashboard({ token, user, onLogout }) {
     </div>
   );
 }
-
+ 
 const styles = {
   page: { minHeight: '100vh', background: '#F4F6F9', fontFamily: 'Arial, sans-serif' },
   loading: { padding: 40, textAlign: 'center' },

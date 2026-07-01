@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createBudget, repartirCategories } from '../services/api';
+import Navbar from '../components/Navbar'; 
 
 const CATEGORIES_DEFAULT = [
   { nom: 'Logement', couleur: '#1B3A5C' },
@@ -10,7 +11,7 @@ const CATEGORIES_DEFAULT = [
   { nom: 'Sante', couleur: '#2980B9' },
   { nom: 'Autres', couleur: '#7F8C8D' },
 ];
-
+ 
 export default function Budget({ token }) {
   const [montant, setMontant] = useState('');
   const [dateDebut, setDateDebut] = useState('');
@@ -22,9 +23,9 @@ export default function Budget({ token }) {
   const [etape, setEtape] = useState(1);
   const [idBudget, setIdBudget] = useState(null);
   const [msg, setMsg] = useState('');
-
+ 
   const total = sousbudgets.reduce((s, c) => s + (parseFloat(c.sous_budget) || 0), 0);
-
+ 
   const handleCreer = async () => {
     if (!montant || parseFloat(montant) <= 0) { setMsg('Le budget doit etre > 0'); return; }
     try {
@@ -34,7 +35,7 @@ export default function Budget({ token }) {
       setMsg('');
     } catch (e) { setMsg(e.response?.data?.erreur || 'Erreur'); }
   };
-
+ 
   const handleRepartir = async () => {
     if (total > parseFloat(montant)) { setMsg('La somme des sous-budgets depasse le budget global (RG03)'); return; }
     const cats = sousbudgets.filter(c => parseFloat(c.sous_budget) > 0)
@@ -45,12 +46,12 @@ export default function Budget({ token }) {
       setEtape(3);
     } catch (e) { setMsg(e.response?.data?.erreur || 'Erreur'); }
   };
-
+ 
   return (
     <div style={styles.page}>
       <h2 style={styles.title}>Definir mon budget</h2>
       {msg && <div style={styles.msg}>{msg}</div>}
-
+ 
       {etape === 1 && (
         <div style={styles.card}>
           <h3>Etape 1 — Budget global</h3>
@@ -59,12 +60,12 @@ export default function Budget({ token }) {
             <option value='mensuel'>Mensuel</option>
             <option value='semestriel'>Semestriel</option>
           </select>
-          <input style={styles.input} type='date' value={dateDebut} onChange={e => setDateDebut(e.target.value)} />
-          <input style={styles.input} type='date' value={dateFin} onChange={e => setDateFin(e.target.value)} />
+          <input style={styles.input} type='date' placeholder='Date debut' value={dateDebut} onChange={e => setDateDebut(e.target.value)} />
+          <input style={styles.input} type='date' placeholder='Date fin' value={dateFin} onChange={e => setDateFin(e.target.value)} />
           <button style={styles.btn} onClick={handleCreer}>Suivant</button>
         </div>
       )}
-
+ 
       {etape === 2 && (
         <div style={styles.card}>
           <h3>Etape 2 — Repartition par categorie</h3>
@@ -82,7 +83,7 @@ export default function Budget({ token }) {
           <button style={styles.btn} onClick={handleRepartir}>Enregistrer</button>
         </div>
       )}
-
+ 
       {etape === 3 && (
         <div style={styles.card}>
           <p style={{color:'#27AE60', fontWeight:'bold'}}>Budget enregistre ! Retournez au dashboard pour voir vos statistiques.</p>
@@ -92,7 +93,7 @@ export default function Budget({ token }) {
     </div>
   );
 }
-
+ 
 const styles = {
   page: { padding: 40, fontFamily: 'Arial, sans-serif', background: '#F4F6F9', minHeight: '100vh' },
   title: { color: '#1B3A5C', marginBottom: 20 },
@@ -104,4 +105,4 @@ const styles = {
   catRow: { display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0' },
   catDot: { width: 14, height: 14, borderRadius: '50%', display: 'inline-block' },
   catNom: { flex: 1, fontSize: 14 },
-};
+}
